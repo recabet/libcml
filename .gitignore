@@ -1,0 +1,7 @@
+
+build
+*.out
+*.o
+.idea
+*.xml
+*.iml
