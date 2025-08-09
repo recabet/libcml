@@ -14,7 +14,7 @@ typedef double float64_t;
 struct matrix {
     uint32_t rows;
     uint32_t cols;
-    float32_t** data;
+    float32_t* data;
 };
 
 typedef struct matrix matrix;

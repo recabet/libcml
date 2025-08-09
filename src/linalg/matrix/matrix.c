@@ -7,7 +7,6 @@
 #include <assert.h>
 #include <time.h>
 
-
 static inline float32_t matrix_random_float(void)
 {
     return (float32_t) rand() / (float32_t) RAND_MAX;
@@ -50,33 +49,19 @@ matrix* matrix_init(const uint32_t rows, const uint32_t cols, const bool randomi
     m->rows = rows;
     m->cols = cols;
 
-    float32_t* block = calloc(rows * cols, sizeof(float32_t));
-    if (!block)
+    m->data = calloc(rows * cols, sizeof(float32_t));
+    if (!m->data)
     {
         perror("Failed to allocate matrix data block");
         free(m);
         return NULL;
     }
 
-    m->data = malloc(rows * sizeof(float32_t *));
-    if (!m->data)
-    {
-        perror("Failed to allocate row pointers");
-        free(block);
-        free(m);
-        return NULL;
-    }
-
-    for (uint32_t i = 0; i < rows; ++i)
-    {
-        m->data[i] = block + i * cols;
-    }
-
     if (randomize)
     {
         for (uint32_t i = 0; i < rows * cols; ++i)
         {
-            block[i] = matrix_random_float();
+            m->data[i] = matrix_random_float();
         }
     }
 
@@ -87,24 +72,23 @@ void matrix_free(matrix* m)
 {
     if (m)
     {
-        if (m->data)
-        {
-            free(m->data[0]);
-            free(m->data);
-        }
+        free(m->data);
         free(m);
     }
 }
 
+// ---------- Fill ----------
 
 void matrix_fill(const matrix* m, const float32_t val)
 {
     assert(m && m->data);
     for (uint32_t i = 0; i < m->rows * m->cols; ++i)
     {
-        m->data[0][i] = val;
+        m->data[i] = val;
     }
 }
+
+// ---------- Print ----------
 
 void matrix_print(const matrix* m)
 {
@@ -119,11 +103,13 @@ void matrix_print(const matrix* m)
         printf("[ ");
         for (uint32_t j = 0; j < m->cols; ++j)
         {
-            printf("%6.3f ", m->data[i][j]);
+            printf("%6.3f ", m->data[i * m->cols + j]);
         }
         printf("]\n");
     }
 }
+
+// ---------- Copy ----------
 
 matrix* matrix_copy(const matrix* m)
 {
@@ -132,7 +118,7 @@ matrix* matrix_copy(const matrix* m)
     if (!copy) return NULL;
     for (uint32_t i = 0; i < m->rows * m->cols; ++i)
     {
-        copy->data[0][i] = m->data[0][i];
+        copy->data[i] = m->data[i];
     }
     return copy;
 }
@@ -145,7 +131,7 @@ matrix* matrix_eye(const uint32_t size)
     if (!m) return NULL;
     for (uint32_t i = 0; i < size; ++i)
     {
-        m->data[i][i] = 1.0f;
+        m->data[i * size + i] = 1.0f;
     }
     return m;
 }
@@ -159,7 +145,7 @@ static matrix* matrix_add_sub(const matrix* m1, const matrix* m2, float32_t sign
     if (!out) return NULL;
     for (uint32_t i = 0; i < m1->rows * m1->cols; ++i)
     {
-        out->data[0][i] = m1->data[0][i] + sign * m2->data[0][i];
+        out->data[i] = m1->data[i] + sign * m2->data[i];
     }
     return out;
 }
@@ -179,7 +165,7 @@ void matrix_add_(const matrix* m1, const matrix* m2, bool free_m2)
     assert(matrix_same_size(m1, m2));
     for (uint32_t i = 0; i < m1->rows * m1->cols; ++i)
     {
-        m1->data[0][i] += m2->data[0][i];
+        m1->data[i] += m2->data[i];
     }
     if (free_m2) matrix_free((matrix *) m2);
 }
@@ -189,7 +175,7 @@ void matrix_sub_(const matrix* m1, const matrix* m2, bool free_m2)
     assert(matrix_same_size(m1, m2));
     for (uint32_t i = 0; i < m1->rows * m1->cols; ++i)
     {
-        m1->data[0][i] -= m2->data[0][i];
+        m1->data[i] -= m2->data[i];
     }
     if (free_m2) matrix_free((matrix *) m2);
 }
@@ -203,7 +189,7 @@ matrix* matrix_scalar_mul(const matrix* m, float32_t scalar)
     if (!result) return NULL;
     for (uint32_t i = 0; i < m->rows * m->cols; ++i)
     {
-        result->data[0][i] = m->data[0][i] * scalar;
+        result->data[i] = m->data[i] * scalar;
     }
     return result;
 }
@@ -213,7 +199,7 @@ void matrix_scalar_mul_(const matrix* m, const float32_t scalar)
     assert(m && m->data);
     for (uint32_t i = 0; i < m->rows * m->cols; ++i)
     {
-        m->data[0][i] *= scalar;
+        m->data[i] *= scalar;
     }
 }
 
@@ -228,7 +214,7 @@ matrix* matrix_transpose(const matrix* m)
     {
         for (uint32_t j = 0; j < m->cols; ++j)
         {
-            t->data[j][i] = m->data[i][j];
+            t->data[j * t->cols + i] = m->data[i * m->cols + j];
         }
     }
     return t;
@@ -246,7 +232,7 @@ void matrix_transpose_(const matrix* m)
     {
         for (uint32_t j = i + 1; j < m->cols; ++j)
         {
-            swap(&m->data[i][j], &m->data[j][i]);
+            swap(&m->data[i * m->cols + j], &m->data[j * m->cols + i]);
         }
     }
 }
@@ -259,7 +245,7 @@ float32_t matrix_trace(const matrix* m)
     float32_t trace = 0.0f;
     for (uint32_t i = 0; i < m->rows; ++i)
     {
-        trace += m->data[i][i];
+        trace += m->data[i * m->cols + i];
     }
     return trace;
 }
