@@ -1,4 +1,4 @@
-#include "src/matrix/matrix.h"
+#include "src/linalg/matrix/matrix.h"
 
 #include <stdio.h>
 #include <stdlib.h>

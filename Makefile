@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -O3
-SRC_DIR = src/matrix
+SRC_DIR = src/linalg/matrix
 BUILD_DIR = build
 TARGET = $(BUILD_DIR)/main
 
