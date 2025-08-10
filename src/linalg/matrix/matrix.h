@@ -21,6 +21,10 @@ typedef struct matrix matrix;
 
 matrix* matrix_init(uint32_t rows, uint32_t cols, bool randomize);
 
+float32_t matrix_get(const matrix* m,uint32_t row, uint32_t col);
+
+void matrix_set(const matrix* m, uint32_t row, uint32_t col, float32_t value);
+
 void matrix_print(const matrix* m);
 
 void matrix_free(matrix* m);

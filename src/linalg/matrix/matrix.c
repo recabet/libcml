@@ -7,6 +7,18 @@
 #include <assert.h>
 #include <time.h>
 
+// ---------- Macros for safe/fast element access ----------
+
+#ifdef DEBUG
+#define MGET(m, r, c) matrix_get(m, r, c)
+#define MSET(m, r, c, v) matrix_set(m, r, c, v)
+#else
+#define MGET(m, r, c) ((m)->data[(r) * (m)->cols + (c)])
+#define MSET(m, r, c, v) ((m)->data[(r) * (m)->cols + (c)] = (v))
+#endif
+
+// ---------- Internal helpers ----------
+
 static inline float32_t matrix_random_float(void)
 {
     return (float32_t) rand() / (float32_t) RAND_MAX;
@@ -27,6 +39,25 @@ static inline void swap(float32_t* a, float32_t* b)
     const float32_t tmp = *a;
     *a = *b;
     *b = tmp;
+}
+
+// ---------- Safe element accessors (used only in DEBUG) ----------
+
+inline float32_t matrix_get(const matrix* m, const uint32_t row, const uint32_t col)
+{
+    assert(m && m->data);
+    assert(row < m->rows && col < m->cols);
+    return m->data[row * m->cols + col];
+}
+
+inline void matrix_set(const matrix* m,
+                       const uint32_t row,
+                       const uint32_t col,
+                       const float32_t value)
+{
+    assert(m && m->data);
+    assert(row < m->rows && col < m->cols);
+    m->data[row * m->cols + col] = value;
 }
 
 // ---------- Memory Management ----------
@@ -98,12 +129,12 @@ void matrix_print(const matrix* m)
         return;
     }
     printf("Matrix (%u x %u):\n", m->rows, m->cols);
-    for (uint32_t i = 0; i < m->rows; ++i)
+    for (uint32_t r = 0; r < m->rows; ++r)
     {
         printf("[ ");
-        for (uint32_t j = 0; j < m->cols; ++j)
+        for (uint32_t c = 0; c < m->cols; ++c)
         {
-            printf("%6.3f ", m->data[i * m->cols + j]);
+            printf("%6.3f ", MGET(m, r, c));
         }
         printf("]\n");
     }
@@ -116,7 +147,7 @@ matrix* matrix_copy(const matrix* m)
     assert(m);
     matrix* copy = matrix_init(m->rows, m->cols, false);
     if (!copy) return NULL;
-    for (uint32_t i = 0; i < m->rows * m->cols; ++i)
+    for (uint32_t i = 0; i = m->rows * m->cols; ++i)
     {
         copy->data[i] = m->data[i];
     }
@@ -131,7 +162,7 @@ matrix* matrix_eye(const uint32_t size)
     if (!m) return NULL;
     for (uint32_t i = 0; i < size; ++i)
     {
-        m->data[i * size + i] = 1.0f;
+        MSET(m, i, i, 1.0f);
     }
     return m;
 }
@@ -160,7 +191,7 @@ matrix* matrix_sub(const matrix* m1, const matrix* m2)
     return matrix_add_sub(m1, m2, -1.0f);
 }
 
-void matrix_add_(const matrix* m1, const matrix* m2, bool free_m2)
+void matrix_add_(const matrix* m1, const matrix* m2, const bool free_m2)
 {
     assert(matrix_same_size(m1, m2));
     for (uint32_t i = 0; i < m1->rows * m1->cols; ++i)
@@ -170,7 +201,7 @@ void matrix_add_(const matrix* m1, const matrix* m2, bool free_m2)
     if (free_m2) matrix_free((matrix *) m2);
 }
 
-void matrix_sub_(const matrix* m1, const matrix* m2, bool free_m2)
+void matrix_sub_(const matrix* m1, const matrix* m2, const bool free_m2)
 {
     assert(matrix_same_size(m1, m2));
     for (uint32_t i = 0; i < m1->rows * m1->cols; ++i)
@@ -182,7 +213,7 @@ void matrix_sub_(const matrix* m1, const matrix* m2, bool free_m2)
 
 // ---------- Scalar Operations ----------
 
-matrix* matrix_scalar_mul(const matrix* m, float32_t scalar)
+matrix* matrix_scalar_mul(const matrix* m, const float32_t scalar)
 {
     assert(m && m->data);
     matrix* result = matrix_init(m->rows, m->cols, false);
@@ -214,7 +245,7 @@ matrix* matrix_transpose(const matrix* m)
     {
         for (uint32_t j = 0; j < m->cols; ++j)
         {
-            t->data[j * t->cols + i] = m->data[i * m->cols + j];
+            MSET(t, j, i, MGET(m, i, j));
         }
     }
     return t;
@@ -232,7 +263,7 @@ void matrix_transpose_(const matrix* m)
     {
         for (uint32_t j = i + 1; j < m->cols; ++j)
         {
-            swap(&m->data[i * m->cols + j], &m->data[j * m->cols + i]);
+            swap(&MGET(m, i, j), &MGET(m, j, i));
         }
     }
 }
@@ -245,7 +276,7 @@ float32_t matrix_trace(const matrix* m)
     float32_t trace = 0.0f;
     for (uint32_t i = 0; i < m->rows; ++i)
     {
-        trace += m->data[i * m->cols + i];
+        trace += MGET(m, i, i);
     }
     return trace;
 }
