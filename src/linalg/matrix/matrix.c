@@ -10,11 +10,11 @@
 // ---------- Macros for safe/fast element access ----------
 
 #ifdef DEBUG
-#define MGET(m, r, c) matrix_get(m, r, c)
-#define MSET(m, r, c, v) matrix_set(m, r, c, v)
+    #define MGET(m, r, c) matrix_get(m, r, c)
+    #define MSET(m, r, c, v) matrix_set(m, r, c, v)
 #else
-#define MGET(m, r, c) ((m)->data[(r) * (m)->cols + (c)])
-#define MSET(m, r, c, v) ((m)->data[(r) * (m)->cols + (c)] = (v))
+    #define MGET(m, r, c) ((m)->data[(r) * (m)->cols + (c)])
+    #define MSET(m, r, c, v) ((m)->data[(r) * (m)->cols + (c)] = (v))
 #endif
 
 // ---------- Internal helpers ----------
@@ -147,7 +147,7 @@ matrix* matrix_copy(const matrix* m)
     assert(m);
     matrix* copy = matrix_init(m->rows, m->cols, false);
     if (!copy) return NULL;
-    for (uint32_t i = 0; i = m->rows * m->cols; ++i)
+    for (uint32_t i = 0; i < m->rows * m->cols; ++i)
     {
         copy->data[i] = m->data[i];
     }
@@ -279,4 +279,83 @@ float32_t matrix_trace(const matrix* m)
         trace += MGET(m, i, i);
     }
     return trace;
+}
+
+
+// ---------- Elementary Row Operations ----------
+
+void matrix_row_swap_(const matrix* m, const uint32_t r1, const uint32_t r2)
+{
+    assert(m && m->data);
+    assert(r1 < m->rows && r2 < m->rows);
+    if (r1 == r2) return;
+
+    for (uint32_t c = 0; c < m->cols; ++c)
+    {
+        swap(&MGET(m, r1, c), &MGET(m, r2, c));
+    }
+}
+
+void matrix_row_scale_(const matrix* m, const uint32_t r, const float32_t scalar)
+{
+    assert(m && m->data);
+    assert(r < m->rows);
+    for (uint32_t c = 0; c < m->cols; ++c)
+    {
+        MGET(m, r, c) *= scalar;
+    }
+}
+
+void matrix_row_add_multiple_(const matrix* m,
+                              const uint32_t src,
+                              const uint32_t dst,
+                              const float32_t scalar)
+{
+    assert(m && m->data);
+    assert(src < m->rows && dst < m->rows);
+    if (src == dst) return;
+
+    for (uint32_t c = 0; c < m->cols; ++c)
+    {
+        MGET(m, dst, c) += scalar * MGET(m, src, c);
+    }
+}
+
+// ---------- Elementary Column Operations ----------
+
+void matrix_col_swap_(const matrix* m, const uint32_t c1, const uint32_t c2)
+{
+    assert(m && m->data);
+    assert(c1 < m->cols && c2 < m->cols);
+    if (c1 == c2) return;
+
+    for (uint32_t r = 0; r < m->rows; ++r)
+    {
+        swap(&MGET(m, r, c1), &MGET(m, r, c2));
+    }
+}
+
+void matrix_col_scale_(const matrix* m, const uint32_t c, const float32_t scalar)
+{
+    assert(m && m->data);
+    assert(c < m->cols);
+    for (uint32_t r = 0; r < m->rows; ++r)
+    {
+        MGET(m, r, c) *= scalar;
+    }
+}
+
+void matrix_col_add_multiple_(const matrix* m,
+                              const uint32_t src,
+                              const uint32_t dst,
+                              const float32_t scalar)
+{
+    assert(m && m->data);
+    assert(src < m->cols && dst < m->cols);
+    if (src == dst) return;
+
+    for (uint32_t r = 0; r < m->rows; ++r)
+    {
+        MGET(m, r, dst) += scalar * MGET(m, r, src);
+    }
 }
