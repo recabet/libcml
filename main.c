@@ -42,7 +42,7 @@ int main(void)
     matrix_print(F);
 
     printf("\n=== Testing matrix_scalar_mul_ (in-place) ===\n");
-    matrix_scalar_mul(B, 3.0f);
+    matrix_scalar_mul_(B, 3.0f);
     matrix_print(B);
 
     printf("\n=== Testing matrix_transpose ===\n");
@@ -60,6 +60,38 @@ int main(void)
     printf("\n=== Testing matrix_trace ===\n");
     float tr = matrix_trace(I);
     printf("Trace of I: %.3f\n", tr);
+
+    // === Testing elementary row operations ===
+    printf("\n=== Testing row swap ===\n");
+    printf("Before swap rows 0 and 1:\n");
+    matrix_print(A);
+    matrix_row_swap_(A, 0, 1);
+    printf("After swap rows 0 and 1:\n");
+    matrix_print(A);
+
+    printf("\n=== Testing row scale (multiply row 1 by 2) ===\n");
+    matrix_row_scale_(A, 1, 2.0f);
+    matrix_print(A);
+
+    printf("\n=== Testing row add multiple (add 0.5 * row 1 to row 2) ===\n");
+    matrix_row_add_multiple_(A, 1, 2, 0.5f);
+    matrix_print(A);
+
+    // === Testing elementary column operations ===
+    printf("\n=== Testing column swap ===\n");
+    printf("Before swap cols 0 and 2:\n");
+    matrix_print(A);
+    matrix_col_swap_(A, 0, 2);
+    printf("After swap cols 0 and 2:\n");
+    matrix_print(A);
+
+    printf("\n=== Testing column scale (multiply col 1 by 0.5) ===\n");
+    matrix_col_scale_(A, 1, 0.5f);
+    matrix_print(A);
+
+    printf("\n=== Testing column add multiple (add -1 * col 2 to col 0) ===\n");
+    matrix_col_add_multiple_(A, 2, 0, -1.0f);
+    matrix_print(A);
 
     // Free all
     matrix_free(A);
