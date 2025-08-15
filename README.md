@@ -4,10 +4,10 @@
 Use [BSD coding standard](https://man.freebsd.org/cgi/man.cgi?style(9))
 
 # TODO
-- [ ] Api
-  - [ ] Tensor
-  - [ ] Matrix
-  - [ ] Vector
+- [x] Api
+  - [x] Tensor
+  - [x] Matrix
+  - [x] Vector
 - [ ] Tests
   - [ ] Tensor
   - [ ] Matrix
