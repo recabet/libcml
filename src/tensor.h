@@ -11,9 +11,9 @@ typedef struct {
 /*
  * Creation
  */
-Tensor 	*tensor_init(const int ndim, const int *shape);
-Tensor 	*tensor_zeros(const int ndim, const int *shape);
-Tensor 	*tensor_ones(const int ndim, const int *shape);
+Tensor 	*tensor_init(int ndim, const int *shape);
+Tensor 	*tensor_zeros(int ndim, const int *shape);
+Tensor 	*tensor_ones(int ndim, const int *shape);
 
 /*
  * Memory Management
