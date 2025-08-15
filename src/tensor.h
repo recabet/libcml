@@ -8,16 +8,22 @@ typedef struct {
     int ndim;
 } Tensor;
 
-/* Creation */
+/*
+ * Creation
+ */
 Tensor *tensor_init(int ndim, const int *shape);
 Tensor *tensor_zeros(int ndim, const int *shape);
 Tensor *tensor_ones(int ndim, const int *shape);
 
-/* Memory Management*/
+/*
+ * Memory Management
+ */
 void tensor_free(Tensor *t);
 
-/* Operations */
+/*
+ * Operations
+ */
 Tensor *tensor_copy(Tensor *t);
 void tensor_fill(Tensor *t, float value);
 
-#endif
+#endif /* __TENSOR_H__ */
