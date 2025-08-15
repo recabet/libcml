@@ -14,5 +14,6 @@ Use [BSD coding standard](https://man.freebsd.org/cgi/man.cgi?style(9))
   - [ ] Vector
 - [ ] Implementation 
   - [ ] Tensor
-  - [ ] Matrix
-  - [ ] Vector
+  - [x] Matrix
+  - [x] Vector
+- [ ] Posix Makefile
