@@ -1,0 +1,4 @@
+# Machine Learning Library implemented in C.
+
+# Coding Standards
+Use [BSD coding standard](https://man.freebsd.org/cgi/man.cgi?style(9))
